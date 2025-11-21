@@ -94,25 +94,31 @@ def predict():
             # Parse the selected date and add the selected hour
             selected_datetime = pd.to_datetime(selected_date) + pd.Timedelta(hours=selected_hour)
             
-            # Create single entry for the selected hour
-            wind_data = [{
-                'Wind Speed': wind_speed,
-                'Wind Direction': wind_dir,
-                'Pressure': pressure,
-                'Air Temperature': air_temp,
-            }]
-
-            demand_data = [{
-                'Temperature': demand_temp,
-                'Humidity': humidity,
-                'Timestamp': selected_datetime
-            }]
-
+            # Create 24 hourly entries with the same values (models need 24 entries)
+            wind_data = []
+            demand_data = []
+            
+            for hour in range(24):
+                timestamp = selected_datetime.replace(hour=hour)
+                
+                wind_data.append({
+                    'Wind Speed': wind_speed,
+                    'Wind Direction': wind_dir,
+                    'Pressure': pressure,
+                    'Air Temperature': air_temp,
+                })
+                
+                demand_data.append({
+                    'Temperature': demand_temp,
+                    'Humidity': humidity,
+                    'Timestamp': timestamp
+                })
+            
             # Convert to DataFrames
             wind_df = pd.DataFrame(wind_data)
             demand_df = pd.DataFrame(demand_data)
 
-            # Store selected datetime for later use
+            # Store selected datetime and hour for later use
             request.selected_datetime = selected_datetime
             request.selected_hour = selected_hour
                 
@@ -310,9 +316,10 @@ def predict():
 
     # If manual input, show comparison page with predicted vs actual for single hour
     if input_type == 'manual':
-        # Get the specific hour's data
-        wind_predicted = [wind_forecast[0]]  # Just the first (and only) prediction
-        demand_predicted = [demand_forecast[0]]  # Just the first (and only) prediction
+        # Get the specific hour's prediction from the 24-hour forecast
+        selected_hour = request.selected_hour if hasattr(request, 'selected_hour') else 12
+        wind_predicted = [wind_forecast[selected_hour]]  # Get the specific hour's prediction
+        demand_predicted = [demand_forecast[selected_hour]]  # Get the specific hour's prediction
         
         wind_actual = [0]  # Default value
         demand_actual = [0]  # Default value
@@ -350,41 +357,6 @@ def predict():
         except Exception as e:
             print(f"Error loading demand actual data: {e}")
             demand_actual = demand_predicted
-        
-        # Calculate error metrics
-        def calculate_mape(actual, predicted):
-            """Calculate Mean Absolute Percentage Error"""
-            if len(actual) == 0:
-                return 0
-            errors = []
-            for a, p in zip(actual, predicted):
-                if a != 0:
-                    errors.append(abs((a - p) / a) * 100)
-            return sum(errors) / len(errors) if errors else 0
-        
-        def calculate_errors(actual, predicted):
-            """Calculate percentage errors for each hour"""
-            errors = []
-            for a, p in zip(actual, predicted):
-                if a != 0:
-                    errors.append(abs((a - p) / a) * 100)
-                else:
-                    errors.append(0)
-            return errors
-        
-        wind_errors = calculate_errors(wind_actual, wind_predicted)
-        demand_errors = calculate_errors(demand_actual, demand_predicted)
-        
-        wind_mape = calculate_mape(wind_actual, wind_predicted)
-        demand_mape = calculate_mape(demand_actual, demand_predicted)
-        
-        wind_pred_avg = sum(wind_predicted) / len(wind_predicted) if wind_predicted else 0
-        wind_actual_avg = sum(wind_actual) / len(wind_actual) if wind_actual else 0
-        wind_diff = wind_pred_avg - wind_actual_avg
-        
-        demand_pred_avg = sum(demand_predicted) / len(demand_predicted) if demand_predicted else 0
-        demand_actual_avg = sum(demand_actual) / len(demand_actual) if demand_actual else 0
-        demand_diff = demand_pred_avg - demand_actual_avg
         
         return render_template(
             "manual_results.html",
