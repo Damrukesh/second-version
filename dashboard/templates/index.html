@@ -8,14 +8,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
       body {
-        background: #181c20;
+        background-color: #12161a;
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        background-repeat: no-repeat;
         color: #e0e0e0;
-        font-family: Arial, sans-serif;
+        font-family: 'Inter', sans-serif;
         margin: 0;
         padding: 0;
+        min-height: 100vh;
       }
       .hero {
-        background: linear-gradient(135deg, #0f2027 0%, #2c5364 100%);
+        background: linear-gradient(135deg, rgba(15, 32, 39, 0.9) 0%, rgba(44, 83, 100, 0.9) 100%);
         color: #fff;
         padding: 32px 0 20px 0;
         text-align: center;
@@ -25,27 +30,29 @@
         max-width: 1400px;
         margin: 0 auto;
         padding: 24px;
-        background: #23272b;
+        background: rgba(35, 39, 43, 0.95);
         border-radius: 10px;
-        box-shadow: 0 2px 16px rgba(0,0,0,0.4);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(5px);
       }
       .tab {
         overflow: hidden;
         border: 1px solid #222;
-        background-color: #23272b;
+        background-color: rgba(35, 39, 43, 0.95);
         border-radius: 4px 4px 0 0;
         margin: 0;
       }
       .tab button {
-        background-color: #23272b;
+        background-color: rgba(35, 39, 43, 0.95);
         color: #d8d8d8;
         float: left;
         border: none;
         outline: none;
         cursor: pointer;
-        padding: 10px 16px;
+        padding: 14px 16px;
         transition: 0.3s;
-        font-size: 14px;
+        font-size: 15px;
+        font-weight: 500;
       }
       .tab button:hover {
         background-color: #343941;
@@ -57,11 +64,10 @@
       }
       .tabcontent {
         display: none;
-        padding: 20px;
-        background: #23272b;
-        color: #e0e0e0;
+        padding: 6px 12px;
         border: 1px solid #222;
         border-top: none;
+        background-color: rgba(35, 39, 43, 0.95);
         border-radius: 0 0 4px 4px;
       }
       .file-row label {
@@ -311,7 +317,7 @@
   </head>
   <body>
     <div class="hero">
-      <h1>Wind & Demand Forecasting Dashboard</h1>
+      <h1>Ecorythm : Energy forecasting and management</h1>
       <p>Upload CSV files or enter values manually to forecast the next 24 hours.</p>
     </div>
     
@@ -476,6 +482,9 @@
           }
         });
       });
+
+        // Set background image
+        document.body.style.backgroundImage = `url('{{ url_for('static', filename='image.png') }}')`;
     </script>
   </body>
 </html>
